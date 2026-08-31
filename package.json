@@ -1,8 +1,15 @@
 {
 	"name": "postcss-selector-transform",
 	"version": "0.0.0",
-	"description": "Description",
-	"keywords": [],
+	"description": "Selector-level plugin surface for PostCSS: one parse, any number of selector transforms — plus styleAliases, build-time “style B like A” via :is() and :where()",
+	"keywords": [
+		"postcss",
+		"postcss-plugin",
+		"css",
+		"selectors",
+		"alias",
+		"extend"
+	],
 	"homepage": "https://github.com/leaverou/postcss-selector-transform/#readme",
 	"bugs": {
 		"url": "https://github.com/leaverou/postcss-selector-transform/issues"
@@ -15,16 +22,33 @@
 	"author": "Lea Verou",
 	"type": "module",
 	"main": "src/index.js",
+	"exports": {
+		".": "./src/index.js",
+		"./style-aliases": "./src/style-aliases.js"
+	},
+	"files": [
+		"src"
+	],
+	"engines": {
+		"node": ">=22"
+	},
+	"peerDependencies": {
+		"postcss": "^8.0.0"
+	},
 	"scripts": {
 		"release": "npm whoami >/dev/null 2>&1 || npm login && release-it",
-		"test": "npx htest test"
+		"test": "htest test"
 	},
 	"devDependencies": {
+		"htest.dev": "latest",
+		"postcss": "^8.5.26",
 		"prettier": "~3.5.3",
 		"prettier-plugin-brace-style": "latest",
 		"prettier-plugin-merge": "latest",
 		"prettier-plugin-space-before-function-paren": "latest",
-		"release-it": "latest",
-		"htest.dev": "latest"
+		"release-it": "latest"
+	},
+	"dependencies": {
+		"postcss-selector-parser": "^7.1.5"
 	}
 }
