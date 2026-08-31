@@ -1,6 +1,6 @@
 {
 	"name": "postcss-selector-transform",
-	"version": "0.0.0",
+	"version": "0.0.1",
 	"description": "Selector-level plugin surface for PostCSS: one parse, any number of selector transforms — plus styleAliases, build-time “style B like A” via :is() and :where()",
 	"keywords": [
 		"postcss",
