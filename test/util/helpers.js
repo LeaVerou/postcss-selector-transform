@@ -1,6 +1,7 @@
 import postcss from "postcss";
 import parser from "postcss-selector-parser";
 import styleAliases from "../../src/style-aliases.js";
+import { LEGACY_PSEUDO_ELEMENTS } from "../../src/selectors.js";
 
 /**
  * Run styleAliases over `css` and return the output.
@@ -18,8 +19,7 @@ export function applyAliases (css, aliases) {
 	return out;
 }
 
-const PSEUDO_ELEMENTS = new Set([":before", ":after", ":first-line", ":first-letter"]);
-const MAX_OF_ARGS = new Set([":is", ":not", ":has", ":matches"]);
+const MAX_OF_ARGS = new Set([":is", ":not", ":has"]);
 
 /**
  * Compute the specificity of a single complex selector as [id, class, type].
@@ -48,7 +48,7 @@ function specificityOf (selector) {
 			case "pseudo": {
 				let name = node.value.toLowerCase();
 
-				if (name.startsWith("::") || PSEUDO_ELEMENTS.has(name)) {
+				if (name.startsWith("::") || LEGACY_PSEUDO_ELEMENTS.has(name)) {
 					result[2]++;
 				}
 				else if (name === ":where") {

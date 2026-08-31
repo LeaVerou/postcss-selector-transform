@@ -5,6 +5,8 @@ PostCSS plugin to facilitate selector-level transforms: just write the transform
 Built on top of it, **Style aliases** that lets you define selectors that should be styled like other selectors. E.g. "style `.callout-title` like `h4`".
 Effectively, a build-time `@extend` that works, with no selector explosion, no specificity creep, and no cascade surprises.
 
+See also [postcss-zero-specificity](https://github.com/leaverou/postcss-zero-specificity), a separate plugin built on this one that wraps every selector in `:where()`.
+
 **Why?** PostCSS has visitors for rules and declarations, but no selector-level plugin surface: every selector-touching plugin re-parses `rule.selector` itself, and _N_ plugins mean _N_ parses per rule. This plugin parses each rule's selector **once** with [postcss-selector-parser](https://github.com/postcss/postcss-selector-parser), runs every registered transform over the shared AST, and stringifies **once** — no matter how many transforms are registered.
 
 ```sh
@@ -97,12 +99,22 @@ button {
 
 ### Composing with other transforms
 
-`styleAliases(map)` is itself implemented as a selector transform, and that transform factory is exported too. To run it alongside your own transforms in a single parse:
+`styleAliases(map)` is itself implemented as a selector transform, and that transform factory is exported too. To run it alongside your own transforms — or transforms from other packages, like [postcss-zero-specificity](https://github.com/leaverou/postcss-zero-specificity)'s `zeroTransform` — in a single parse:
 
 ```js
 import selectorTransform, { aliasTransform } from "postcss-selector-transform";
+import { zeroTransform } from "postcss-zero-specificity";
 
 selectorTransform({
-	transforms: [aliasTransform({ ".callout-title": "h4" }), myOtherTransform],
+	transforms: [aliasTransform({ ".callout-title": "h4" }), zeroTransform, myOtherTransform],
 });
 ```
+
+## `postcss-selector-transform/selectors`
+
+Generic helpers over postcss-selector-parser ASTs, for transform authors:
+
+- `isPseudoElement(node)` — whether a node is a pseudo-element, including the legacy single-colon forms (`LEGACY_PSEUDO_ELEMENTS`).
+- `wrap(wrapper, nodes, container)` — move consecutive `nodes` into `wrapper`'s first (empty) selector argument in place, inserting the wrapper where they were and keeping their surrounding whitespace outside — e.g. wrapping a compound in a parsed `:where()`.
+- `partKey(node)` / `selectorKey(selector)` — canonical keys for structural (never textual) selector comparison: `H4` equals `h4`, `[a=b]` equals `[a="b"]`, escapes are normalized.
+- `SIMPLE`, `LIST_PSEUDOS` — node-type/pseudo-class classification sets.

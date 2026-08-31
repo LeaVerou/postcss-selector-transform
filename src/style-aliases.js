@@ -1,6 +1,13 @@
 import parser from "postcss-selector-parser";
 import selectorTransform from "./index.js";
-import { SIMPLE, LIST_PSEUDOS, isPseudoElement, partKey, selectorKey } from "./selectors.js";
+import {
+	SIMPLE,
+	LIST_PSEUDOS,
+	isPseudoElement,
+	partKey,
+	selectorKey,
+	wrap as wrapNodes,
+} from "./selectors.js";
 /** Nearest ancestor rule, looking through conditional at-rules like `@media` */
 function parentRule (rule) {
 	for (let n = rule.parent; n; n = n.parent) {
@@ -257,22 +264,7 @@ export function aliasTransform (aliases) {
 	 */
 	function wrap (group, matched, container) {
 		let wrapper = parser().astSync(`:is(, ${group.where})`).first.first;
-		let first = matched[0];
-		let last = matched.at(-1);
-
-		// The compound's surrounding whitespace stays outside the wrapper
-		wrapper.spaces.before = first.spaces.before;
-		wrapper.spaces.after = last.spaces.after;
-		first.spaces.before = "";
-		last.spaces.after = "";
-		container.insertBefore(first, wrapper);
-
-		for (let node of matched) {
-			node.remove();
-			wrapper.nodes[0].append(node);
-		}
-
-		generated.add(wrapper);
+		generated.add(wrapNodes(wrapper, matched, container));
 		return wrapper;
 	}
 

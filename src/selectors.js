@@ -1,8 +1,8 @@
 /**
  * Generic helpers over postcss-selector-parser ASTs:
- * node classification and canonical keys for structural (never textual) comparison.
- * NOTE: internal for now; could graduate to a public "./selectors" export if
- * transform authors turn out to need it.
+ * node classification, in-place wrapping, and canonical keys for structural
+ * (never textual) comparison. Public as "postcss-selector-transform/selectors"
+ * for transform authors (postcss-zero-specificity uses it).
  */
 
 /** Simple selector node types that can be part of a compound */
@@ -12,7 +12,12 @@ export const SIMPLE = new Set(["tag", "class", "id", "attribute", "pseudo", "uni
 export const LIST_PSEUDOS = new Set([":is", ":where", ":not", ":has"]);
 
 /** Pseudo-elements that are valid with a single colon for legacy reasons */
-const LEGACY_PSEUDO_ELEMENTS = new Set([":before", ":after", ":first-line", ":first-letter"]);
+export const LEGACY_PSEUDO_ELEMENTS = new Set([
+	":before",
+	":after",
+	":first-line",
+	":first-letter",
+]);
 
 /** @param {import("postcss-selector-parser").Node} node */
 export function isPseudoElement (node) {
@@ -20,6 +25,33 @@ export function isPseudoElement (node) {
 		node.type === "pseudo" &&
 		(node.value.startsWith("::") || LEGACY_PSEUDO_ELEMENTS.has(node.value.toLowerCase()))
 	);
+}
+
+/**
+ * Move `nodes` (consecutive nodes of one selector, in document order) into
+ * `wrapper`'s first (empty) selector argument, in place, inserting the wrapper
+ * where they were. The nodes' surrounding whitespace stays outside the wrapper.
+ * @param {import("postcss-selector-parser").Pseudo} wrapper - e.g. a parsed `:where()`
+ * @param {import("postcss-selector-parser").Node[]} nodes
+ * @param {import("postcss-selector-parser").Container} container - the nodes' parent
+ * @returns {import("postcss-selector-parser").Pseudo} the wrapper
+ */
+export function wrap (wrapper, nodes, container) {
+	let first = nodes[0];
+	let last = nodes.at(-1);
+
+	wrapper.spaces.before = first.spaces.before;
+	wrapper.spaces.after = last.spaces.after;
+	first.spaces.before = "";
+	last.spaces.after = "";
+	container.insertBefore(first, wrapper);
+
+	for (let node of nodes) {
+		node.remove();
+		wrapper.nodes[0].append(node);
+	}
+
+	return wrapper;
 }
 
 /** Namespace prefix for tag/universal/attribute keys (`true` means the empty namespace) */

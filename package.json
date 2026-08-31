@@ -24,7 +24,8 @@
 	"main": "src/index.js",
 	"exports": {
 		".": "./src/index.js",
-		"./style-aliases": "./src/style-aliases.js"
+		"./style-aliases": "./src/style-aliases.js",
+		"./selectors": "./src/selectors.js"
 	},
 	"files": [
 		"src"
