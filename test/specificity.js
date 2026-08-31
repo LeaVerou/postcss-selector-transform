@@ -26,5 +26,7 @@ export default {
 		{ arg: "#nav h4" },
 		{ arg: ":not(h4)" },
 		{ arg: "li:nth-child(2n) a.button" },
+		{ arg: "li:nth-child(2n of h4)" },
+		{ arg: "::slotted(h4)" },
 	],
 };

@@ -2,10 +2,11 @@ import parser from "postcss-selector-parser";
 import selectorTransform from "./index.js";
 import {
 	SIMPLE,
-	LIST_PSEUDOS,
+	SELECTOR_PSEUDOS,
 	isPseudoElement,
 	partKey,
 	selectorKey,
+	selectorStart,
 	wrap as wrapNodes,
 } from "./selectors.js";
 
@@ -331,12 +332,16 @@ export function aliasTransform (aliases) {
 		}
 	}
 
-	/** Process one selector: recurse into selector-list pseudos, then wrap occurrences */
+	/** Process one selector: recurse into selector-bearing pseudos, then wrap occurrences */
 	function processSelector (selector, rule) {
-		for (let node of selector.nodes) {
+		// Skip an nth pseudo's `An+B of` prefix. Wraps only ever restructure nodes
+		// at or after this point, so the index stays valid for the whole call.
+		let start = selectorStart(selector);
+
+		for (let node of selector.nodes.slice(start)) {
 			if (
 				node.type === "pseudo" &&
-				LIST_PSEUDOS.has(node.value.toLowerCase()) &&
+				SELECTOR_PSEUDOS.has(node.value.toLowerCase()) &&
 				!isGenerated(node)
 			) {
 				for (let inner of node.nodes) {
@@ -349,7 +354,7 @@ export function aliasTransform (aliases) {
 			// Recompute compounds per group: earlier wraps have restructured the nodes
 			let compound = [];
 
-			for (let node of [...selector.nodes, null]) {
+			for (let node of [...selector.nodes.slice(start), null]) {
 				if (node && node.type !== "combinator") {
 					compound.push(node);
 				}

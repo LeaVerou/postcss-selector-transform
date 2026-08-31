@@ -181,7 +181,7 @@ export default {
 			],
 		},
 		{
-			name: "Selector-list pseudos",
+			name: "Selector-bearing pseudos",
 			tests: [
 				{
 					name: "recursion into :is()",
@@ -209,9 +209,52 @@ export default {
 					expect: ":is(h4, :where(.ct)) {}",
 				},
 				{
-					name: "other functional pseudos are not recursed into",
+					name: "recursion into an :nth-child() of-clause",
 					args: [":nth-child(2n of h4) {}", { ".ct": "h4" }],
-					expect: ":nth-child(2n of h4) {}",
+					expect: ":nth-child(2n of :is(h4, :where(.ct))) {}",
+				},
+				{
+					name: "every selector of an of-clause list, An+B left alone",
+					args: [
+						":nth-child(2n+1 of li.item, .foo) {}",
+						{ ".x": "li.item", ".y": ".foo" },
+					],
+					expect: ":nth-child(2n+1 of :is(li.item, :where(.x)), :is(.foo, :where(.y))) {}",
+				},
+				{
+					name: "recursion into :nth-last-child()",
+					args: [":nth-last-child(-n+2 of h4) {}", { ".ct": "h4" }],
+					expect: ":nth-last-child(-n+2 of :is(h4, :where(.ct))) {}",
+				},
+				{
+					name: "An+B without an of-clause has nothing to match",
+					args: [":nth-child(3) {} :nth-child(odd) {}", { ".ct": "odd" }],
+					expect: ":nth-child(3) {} :nth-child(odd) {}",
+				},
+				{
+					name: "the of keyword is not an element named of",
+					args: [":nth-child(2n of of) {}", { ".ct": "of" }],
+					expect: ":nth-child(2n of :is(of, :where(.ct))) {}",
+				},
+				{
+					name: "uppercase nth pseudo and of keyword",
+					args: [":NTH-CHILD(2N OF h4) {}", { ".ct": "h4" }],
+					expect: ":NTH-CHILD(2N OF :is(h4, :where(.ct))) {}",
+				},
+				{
+					name: "whitespace around An+B is preserved",
+					args: [":nth-child( 2n + 1 of h4 ) {}", { ".ct": "h4" }],
+					expect: ":nth-child( 2n + 1 of :is(h4, :where(.ct)) ) {}",
+				},
+				{
+					name: "recursion into :host() and :host-context()",
+					args: [":host(h4) {} :host-context(h4) {} :host {}", { ".ct": "h4" }],
+					expect: ":host(:is(h4, :where(.ct))) {} :host-context(:is(h4, :where(.ct))) {} :host {}",
+				},
+				{
+					name: "recursion into ::slotted()",
+					args: ["::slotted(h4) {}", { ".ct": "h4" }],
+					expect: "::slotted(:is(h4, :where(.ct))) {}",
 				},
 				{
 					name: "generated-looking :is() with extra arguments is not mistaken for a wrapper",

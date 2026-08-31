@@ -77,7 +77,7 @@ Why this beats classic `@extend`:
 - **Cascade position preserved.** Rules are rewritten in place, never duplicated or moved, so source order — and therefore the cascade — is untouched.
 - **Specificity preserved.** `:where()` has zero specificity and `:is(A, :where(…))` has exactly A's, so the rewritten rule's specificity equals the original's. Aliased elements get the styles at alias-appropriate specificity too, since `:where()` is easy to override.
 
-Matching is **structural**, never textual: `h4` matches `H4` but not `.h400` or `h40`; `[a=b]` matches `[a="b"]`; escaped identifiers match their unescaped forms. Originals are found in every position of complex selectors, in every rule of every (non-ignored) at-rule, in the `@scope` prelude, and inside hand-authored `:is()`, `:where()`, `:not()`, and `:has()`. The output is idempotent: running the plugin over its own output changes nothing.
+Matching is **structural**, never textual: `h4` matches `H4` but not `.h400` or `h40`; `[a=b]` matches `[a="b"]`; escaped identifiers match their unescaped forms. Originals are found in every position of complex selectors, in every rule of every (non-ignored) at-rule, in the `@scope` prelude, and inside every pseudo whose argument is a selector: `:is()`, `:where()`, `:not()`, `:has()`, the `of` clause of `:nth-child()` / `:nth-last-child()`, and `:host()`, `:host-context()`, `::slotted()`. The output is idempotent: running the plugin over its own output changes nothing.
 
 The **original (A)** must be a simple or compound selector (`h4`, `a.button`) — an alias stands in for a single element's selector. The **alias (B)** may be any selector, combinators included (`.card > .title`).
 
@@ -117,4 +117,5 @@ Generic helpers over postcss-selector-parser ASTs, for transform authors:
 - `isPseudoElement(node)` — whether a node is a pseudo-element, including the legacy single-colon forms (`LEGACY_PSEUDO_ELEMENTS`).
 - `wrap(wrapper, nodes, container)` — move consecutive `nodes` into `wrapper`'s first (empty) selector argument in place, inserting the wrapper where they were and keeping their surrounding whitespace outside — e.g. wrapping a compound in a parsed `:where()`.
 - `partKey(node)` / `selectorKey(selector)` — canonical keys for structural (never textual) selector comparison: `H4` equals `h4`, `[a=b]` equals `[a="b"]`, escapes are normalized.
-- `SIMPLE`, `LIST_PSEUDOS` — node-type/pseudo-class classification sets.
+- `selectorStart(selector)` — index where actual selector content starts in a selector node, to skip the `An+B of` prefix the parser hands back as tags and combinators inside `:nth-child()` / `:nth-last-child()`. `0` for everything else; `selector.nodes.length` when there is no of-clause at all (`:nth-child(3)`).
+- `SIMPLE`, `LIST_PSEUDOS`, `COMPOUND_PSEUDOS` (`:host()`, `:host-context()`, `::slotted()`), `NTH_PSEUDOS`, `SELECTOR_PSEUDOS` (the union of the latter three) — node-type/pseudo-class classification sets.

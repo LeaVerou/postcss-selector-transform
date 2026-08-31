@@ -13,6 +13,15 @@ export const SIMPLE = new Set(["tag", "class", "id", "attribute", "pseudo", "uni
 /** Functional pseudo-classes whose arguments are a selector list */
 export const LIST_PSEUDOS = new Set([":is", ":where", ":not", ":has"]);
 
+/** Functional pseudos whose argument is a single compound selector */
+export const COMPOUND_PSEUDOS = new Set([":host", ":host-context", "::slotted"]);
+
+/** Functional pseudo-classes whose argument is `An+B of <selector-list>` */
+export const NTH_PSEUDOS = new Set([":nth-child", ":nth-last-child"]);
+
+/** Every functional pseudo whose arguments contain selectors worth walking */
+export const SELECTOR_PSEUDOS = LIST_PSEUDOS.union(COMPOUND_PSEUDOS).union(NTH_PSEUDOS);
+
 /** Pseudo-elements that are valid with a single colon for legacy reasons */
 export const LEGACY_PSEUDO_ELEMENTS = new Set([
 	":before",
@@ -27,6 +36,44 @@ export function isPseudoElement (node) {
 		node.type === "pseudo" &&
 		(node.value.startsWith("::") || LEGACY_PSEUDO_ELEMENTS.has(node.value.toLowerCase()))
 	);
+}
+
+/**
+ * Index where actual selector content starts within a Selector node.
+ * Nonzero only for the first argument of an nth pseudo, whose `An+B of` prefix
+ * the parser has no representation for and hands back as tags and combinators
+ * (`:nth-child(2n+1 of li)` → tag"2n" "+" tag"1" " " tag"of" " " tag"li").
+ * Everything before the returned index must be left alone.
+ * @param {Selector} selector
+ * @returns {number} `selector.nodes.length` if there is no selector at all (e.g. `:nth-child(3)`)
+ */
+export function selectorStart (selector) {
+	let parent = selector.parent;
+
+	if (
+		parent?.type !== "pseudo" ||
+		!NTH_PSEUDOS.has(parent.value.toLowerCase()) ||
+		parent.nodes[0] !== selector
+	) {
+		return 0;
+	}
+
+	let nodes = selector.nodes;
+
+	// The `of` keyword is always whitespace-separated on both sides,
+	// which is what tells it apart from an element named `of`
+	for (let i = 1; i < nodes.length - 1; i++) {
+		if (
+			nodes[i].type === "tag" &&
+			nodes[i].value.toLowerCase() === "of" &&
+			nodes[i - 1].type === "combinator" &&
+			nodes[i + 1].type === "combinator"
+		) {
+			return i + 1;
+		}
+	}
+
+	return nodes.length;
 }
 
 /**
