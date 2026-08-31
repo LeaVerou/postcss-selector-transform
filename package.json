@@ -1,0 +1,30 @@
+{
+	"name": "postcss-selector-transform",
+	"version": "0.0.0",
+	"description": "Description",
+	"keywords": [],
+	"homepage": "https://github.com/leaverou/postcss-selector-transform/#readme",
+	"bugs": {
+		"url": "https://github.com/leaverou/postcss-selector-transform/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/leaverou/postcss-selector-transform.git"
+	},
+	"license": "MIT",
+	"author": "Lea Verou",
+	"type": "module",
+	"main": "src/index.js",
+	"scripts": {
+		"release": "npm whoami >/dev/null 2>&1 || npm login && release-it",
+		"test": "npx htest test"
+	},
+	"devDependencies": {
+		"prettier": "~3.5.3",
+		"prettier-plugin-brace-style": "latest",
+		"prettier-plugin-merge": "latest",
+		"prettier-plugin-space-before-function-paren": "latest",
+		"release-it": "latest",
+		"htest.dev": "latest"
+	}
+}

@@ -1,0 +1,5 @@
+node_modules
+.claude
+
+# Uncomment if repo is an app and not a library
+package-lock.json
