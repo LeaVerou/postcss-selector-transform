@@ -8,6 +8,9 @@ import {
 	selectorKey,
 	wrap as wrapNodes,
 } from "./selectors.js";
+
+/** @import { Plugin } from "postcss" */
+/** @import { SelectorTransform } from "./index.js" */
 /** Nearest ancestor rule, looking through conditional at-rules like `@media` */
 function parentRule (rule) {
 	for (let n = rule.parent; n; n = n.parent) {
@@ -144,7 +147,7 @@ function buildGroups (aliases) {
  * into `:is(A, :where(B1, B2, …))` — same specificity, aliases match too.
  * Compose it with other transforms via `selectorTransform({transforms: […]})`.
  * @param {Record<string, string>} aliases - `{alias: original}`
- * @returns {import("./index.js").SelectorTransform}
+ * @returns {SelectorTransform}
  */
 export function aliasTransform (aliases) {
 	let groups = buildGroups(aliases);
@@ -378,7 +381,7 @@ export function aliasTransform (aliases) {
  * Implemented as a selector transform over `selectorTransform`; to combine with
  * other transforms in a single parse, use `aliasTransform` directly.
  * @param {Record<string, string>} aliases - `{alias: original}`
- * @returns {import("postcss").Plugin}
+ * @returns {Plugin}
  */
 export default function styleAliases (aliases = {}) {
 	let plugin = selectorTransform(aliasTransform(aliases));

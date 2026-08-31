@@ -5,6 +5,8 @@
  * for transform authors (postcss-zero-specificity uses it).
  */
 
+/** @import { Container, Node, Pseudo, Selector } from "postcss-selector-parser" */
+
 /** Simple selector node types that can be part of a compound */
 export const SIMPLE = new Set(["tag", "class", "id", "attribute", "pseudo", "universal"]);
 
@@ -19,7 +21,7 @@ export const LEGACY_PSEUDO_ELEMENTS = new Set([
 	":first-letter",
 ]);
 
-/** @param {import("postcss-selector-parser").Node} node */
+/** @param {Node} node */
 export function isPseudoElement (node) {
 	return (
 		node.type === "pseudo" &&
@@ -31,10 +33,10 @@ export function isPseudoElement (node) {
  * Move `nodes` (consecutive nodes of one selector, in document order) into
  * `wrapper`'s first (empty) selector argument, in place, inserting the wrapper
  * where they were. The nodes' surrounding whitespace stays outside the wrapper.
- * @param {import("postcss-selector-parser").Pseudo} wrapper - e.g. a parsed `:where()`
- * @param {import("postcss-selector-parser").Node[]} nodes
- * @param {import("postcss-selector-parser").Container} container - the nodes' parent
- * @returns {import("postcss-selector-parser").Pseudo} the wrapper
+ * @param {Pseudo} wrapper - e.g. a parsed `:where()`
+ * @param {Node[]} nodes
+ * @param {Container} container - the nodes' parent
+ * @returns {Pseudo} the wrapper
  */
 export function wrap (wrapper, nodes, container) {
 	let first = nodes[0];
@@ -64,7 +66,7 @@ function nsKey (node) {
  * type-selector case, attribute quoting and flag case, and identifier escapes are
  * normalized. Keys are only ever joined with control characters (which cannot appear
  * unescaped in selectors), so user content can't forge a separator.
- * @param {import("postcss-selector-parser").Node} node
+ * @param {Node} node
  * @returns {string}
  */
 export function partKey (node) {
@@ -96,7 +98,7 @@ export function partKey (node) {
 
 /**
  * Canonical key for a full (possibly complex) selector
- * @param {import("postcss-selector-parser").Selector} selector
+ * @param {Selector} selector
  * @returns {string}
  */
 export function selectorKey (selector) {

@@ -1,5 +1,8 @@
 import parser from "postcss-selector-parser";
 
+/** @import { AtRule, Plugin, Rule } from "postcss" */
+/** @import { Root } from "postcss-selector-parser" */
+
 export { default as styleAliases, aliasTransform } from "./style-aliases.js";
 
 /**
@@ -27,8 +30,7 @@ function isIgnored (node) {
 }
 
 /**
- * @typedef {(selectors: import("postcss-selector-parser").Root,
- *            context: {rule: import("postcss").Rule | import("postcss").AtRule}) => void} SelectorTransform
+ * @typedef {(selectors: Root, context: {rule: Rule | AtRule}) => void} SelectorTransform
  * A function that mutates a parsed selector AST in place.
  * `context.rule` is the node the selector belongs to (an at-rule for `@scope` preludes).
  * Rules are visited in document order, parents before their nested children —
@@ -105,7 +107,7 @@ function transformPrelude (params, replace) {
  * Generic selector-level plugin surface for PostCSS: parses each rule's selector
  * once, runs every registered transform over the shared AST, stringifies once.
  * @param {SelectorTransform | SelectorTransform[] | {transforms: SelectorTransform[]}} [options]
- * @returns {import("postcss").Plugin}
+ * @returns {Plugin}
  */
 export default function selectorTransform (options = {}) {
 	if (typeof options === "function") {
